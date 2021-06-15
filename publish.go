@@ -1,6 +1,7 @@
 package rabbitmq
 
 import (
+	"crypto/tls"
 	"fmt"
 	"sync"
 
@@ -144,6 +145,46 @@ func NewPublisher(url string, config amqp.Config, optionFuncs ...func(*Publisher
 	}
 
 	chManager, err := newChannelManager(url, config, options.Logger)
+	if err != nil {
+		return Publisher{}, nil, err
+	}
+
+	publisher := Publisher{
+		chManager:                  chManager,
+		notifyFlowChan:             make(chan bool),
+		disablePublishDueToFlow:    false,
+		disablePublishDueToFlowMux: &sync.RWMutex{},
+		logger:                     options.Logger,
+	}
+
+	returnAMQPChan := make(chan amqp.Return)
+	returnChan := make(chan Return)
+	returnAMQPChan = publisher.chManager.channel.NotifyReturn(returnAMQPChan)
+	go func() {
+		for ret := range returnAMQPChan {
+			returnChan <- Return{
+				ret,
+			}
+		}
+	}()
+
+	publisher.notifyFlowChan = publisher.chManager.channel.NotifyFlow(publisher.notifyFlowChan)
+
+	go publisher.startNotifyFlowHandler()
+
+	return publisher, returnChan, nil
+}
+
+func NewPublisherTLS(url string, config *tls.Config, optionFuncs ...func(*PublisherOptions)) (Publisher, <-chan Return, error) {
+	options := &PublisherOptions{}
+	for _, optionFunc := range optionFuncs {
+		optionFunc(options)
+	}
+	if options.Logger == nil {
+		options.Logger = &noLogger{} // default no logging
+	}
+
+	chManager, err := newChannelManagerTLS(url, config, options.Logger)
 	if err != nil {
 		return Publisher{}, nil, err
 	}

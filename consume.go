@@ -1,6 +1,7 @@
 package rabbitmq
 
 import (
+	"crypto/tls"
 	"fmt"
 	"time"
 
@@ -39,6 +40,26 @@ func NewConsumer(url string, config amqp.Config, optionFuncs ...func(*ConsumerOp
 	}
 
 	chManager, err := newChannelManager(url, config, options.Logger)
+	if err != nil {
+		return Consumer{}, err
+	}
+	consumer := Consumer{
+		chManager: chManager,
+		logger:    options.Logger,
+	}
+	return consumer, nil
+}
+
+func NewConsumerTLS(url string, config *tls.Config, optionFuncs ...func(*ConsumerOptions)) (Consumer, error) {
+	options := &ConsumerOptions{}
+	for _, optionFunc := range optionFuncs {
+		optionFunc(options)
+	}
+	if options.Logger == nil {
+		options.Logger = &noLogger{} // default no logging
+	}
+
+	chManager, err := newChannelManagerTLS(url, config, options.Logger)
 	if err != nil {
 		return Consumer{}, err
 	}
