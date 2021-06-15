@@ -1,6 +1,7 @@
 package rabbitmq
 
 import (
+	"crypto/tls"
 	"errors"
 	"sync"
 	"time"
@@ -36,8 +37,38 @@ func newChannelManager(url string, conf amqp.Config, log Logger) (*channelManage
 	return &chManager, nil
 }
 
+func newChannelManagerTLS(url string, conf *tls.Config, log Logger) (*channelManager, error) {
+	conn, ch, err := getNewChannelTLS(url, conf)
+	if err != nil {
+		return nil, err
+	}
+
+	chManager := channelManager{
+		logger:              log,
+		url:                 url,
+		connection:          conn,
+		channel:             ch,
+		channelMux:          &sync.RWMutex{},
+		notifyCancelOrClose: make(chan error),
+	}
+	go chManager.startNotifyCancelOrClosed()
+	return &chManager, nil
+}
+
 func getNewChannel(url string, conf amqp.Config) (*amqp.Connection, *amqp.Channel, error) {
 	amqpConn, err := amqp.DialConfig(url, conf)
+	if err != nil {
+		return nil, nil, err
+	}
+	ch, err := amqpConn.Channel()
+	if err != nil {
+		return nil, nil, err
+	}
+	return amqpConn, ch, err
+}
+
+func getNewChannelTLS(url string, conf *tls.Config) (*amqp.Connection, *amqp.Channel, error) {
+	amqpConn, err := amqp.DialTLS(url, conf)
 	if err != nil {
 		return nil, nil, err
 	}
