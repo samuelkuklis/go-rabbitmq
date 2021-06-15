@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/streadway/amqp"
-	rabbitmq "github.com/wagslane/go-rabbitmq"
+	rabbitmq "github.com/samuelkuklis/go-rabbitmq"
 )
 
 func main() {

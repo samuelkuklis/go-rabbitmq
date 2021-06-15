@@ -4,7 +4,7 @@ Wrapper of streadway/amqp that provides reconnection logic and sane defaults. Hi
 
 Supported by [Qvault](https://qvault.io)
 
-[![](https://godoc.org/github.com/wagslane/go-rabbitmq?status.svg)](https://godoc.org/github.com/wagslane/go-rabbitmq)![Deploy](https://github.com/wagslane/go-rabbitmq/workflows/Tests/badge.svg)
+[![](https://godoc.org/github.com/samuelkuklis/go-rabbitmq?status.svg)](https://godoc.org/github.com/samuelkuklis/go-rabbitmq)![Deploy](https://github.com/samuelkuklis/go-rabbitmq/workflows/Tests/badge.svg)
 
 ## Motivation
 
@@ -22,7 +22,7 @@ The goal with `go-rabbitmq` is to still provide most all of the nitty-gritty fun
 Outside of a Go module:
 
 ```bash
-go get github.com/wagslane/go-rabbitmq
+go get github.com/samuelkuklis/go-rabbitmq
 ```
 
 ## 🚀 Quick Start Consumer
@@ -122,7 +122,7 @@ go func() {
 
 ## 💬 Contact
 
-[![Twitter Follow](https://img.shields.io/twitter/follow/wagslane.svg?label=Follow%20Wagslane&style=social)](https://twitter.com/intent/follow?screen_name=wagslane)
+[![Twitter Follow](https://img.shields.io/twitter/follow/samuelkuklis.svg?label=Follow%20Wagslane&style=social)](https://twitter.com/intent/follow?screen_name=samuelkuklis)
 
 Submit an issue (above in the issues tab)
 
